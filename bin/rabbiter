@@ -146,6 +146,10 @@ def main
 
   rabbit = DRbObject.new_with_uri(options.rabbit_uri)
   client = Rabbiter::Client.new(logger)
+  trap("INT") do
+    client.close
+    exit(true)
+  end
   client.start(*options.filters) do |status|
     text = status["text"]
     next if text.nil?
@@ -160,12 +164,6 @@ def main
     end
   end
 
-  main_loop = GLib::MainLoop.new
-  trap("INT") do
-    client.close
-    main_loop.quit
-  end
-  main_loop.run
 end
 
 main
